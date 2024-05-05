@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Lyrics-Service")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("Book and Quill")]
+[assembly: AssemblyDescription("A windows application that displays song lyrics based on what you're currently listening on spotify in real-time")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Book and Quill")]
 [assembly: AssemblyProduct("Lyrics-Service")]
 [assembly: AssemblyCopyright("Copyright ©  2024")]
 [assembly: AssemblyTrademark("")]

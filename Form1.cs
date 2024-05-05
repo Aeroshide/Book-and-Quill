@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -23,8 +24,34 @@ namespace Lyrics_Service
         public Form1()
         {
             InitializeComponent();
-            lyricsRequester = new LyricsRequester("wv-MIA02-U6aFHBh89e1eat7pDTXZUca2QWNBtNsq-LBDBrHAK07E-nEs14kkRy1"); // Replace with your actual API key
+            string fileContents = ReadFileContext("secret.aeroshide", "Book-and-Quill");
+            lyricsRequester = new LyricsRequester(fileContents);
         }
+
+        public string ReadFileContext(string fileName, string appName)
+        {
+            // Get the APPDATA environment variable
+            string appData = Environment.GetEnvironmentVariable("APPDATA");
+            if (string.IsNullOrEmpty(appData))
+            {
+                // Handle error: APPDATA environment variable not found.
+                throw new InvalidOperationException("APPDATA environment variable not found.");
+            }
+
+            // Construct the file path
+            string path = Path.Combine(appData, "Aeroshide", appName, fileName);
+
+            // Check if the file exists before attempting to open
+            if (!File.Exists(path))
+            {
+                // Handle error: file could not be opened.
+                throw new FileNotFoundException("The specified file could not be found.", path);
+            }
+
+            // Read and return the file content
+            return File.ReadAllText(path);
+        }
+
         public (SpotifyProcessStatus suc, string ret) HookSpotify()
         {
             Process[] processCandidate = Process.GetProcessesByName("Spotify");

@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Lyrics_Service.Properties {
+namespace Book_and_Quill.Properties {
     
     
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

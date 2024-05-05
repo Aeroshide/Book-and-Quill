@@ -6,6 +6,8 @@ using System.Web;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
+using System.IO;
 
 /**
  * @author Aeroshide
@@ -51,6 +53,7 @@ public class LyricsRequester
     public async Task<string> GetLyricsAsync(string songTitle)
     {
         var songUrl = await SearchSongAsync(songTitle);
+        Debug.WriteLine("Song url: "+ songUrl);
         if (string.IsNullOrEmpty(songUrl))
         {
             return null;
@@ -102,27 +105,55 @@ public class LyricsRequester
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
+                // Log the content for inspection
+                Console.WriteLine(content); // For quick debugging, output to console
+                File.WriteAllText("fetchedContent.html", content); // Or write to a file for larger content
 
                 var doc = new HtmlDocument();
                 doc.LoadHtml(content);
-                var lyricsNode = doc.DocumentNode.SelectSingleNode("//div[@class='lyrics']");
-                if (lyricsNode == null)
+
+                // Attempt to select the first part of the lyrics using the new XPath
+                var lyricsNodePart1 = doc.DocumentNode.SelectSingleNode("//*[@id='lyrics-root']/div[2]");
+                // Attempt to select the second part of the lyrics using the second new XPath
+                var lyricsNodePart2 = doc.DocumentNode.SelectSingleNode("//*[@id='lyrics-root']/div[5]");
+
+                // Initialize an empty string to hold the combined lyrics
+                string lyrics = "";
+
+                // If the first part is found, de-entitize and trim it, then add to lyrics
+                if (lyricsNodePart1 != null)
                 {
-                    lyricsNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'Lyrics__Container')]");
+                    lyrics += HtmlEntity.DeEntitize(lyricsNodePart1.InnerText).Trim();
                 }
 
-                if (lyricsNode != null)
+                // If the second part is found, de-entitize and trim it, then add to lyrics
+                if (lyricsNodePart2 != null)
                 {
-                    var lyrics = HtmlEntity.DeEntitize(lyricsNode.InnerText).Trim();
-                    return lyrics;
+                    // Optionally, add a newline or space between parts if needed
+                    lyrics += "\n" + HtmlEntity.DeEntitize(lyricsNodePart2.InnerText).Trim();
                 }
 
-                return null;
+                // If no specific parts were found, try broader searches
+                if (string.IsNullOrEmpty(lyrics))
+                {
+                    var fallbackLyricsNode = doc.DocumentNode.SelectSingleNode("//div[@class='lyrics']");
+                    if (fallbackLyricsNode == null)
+                    {
+                        fallbackLyricsNode = doc.DocumentNode.SelectSingleNode("//div[contains(@class, 'Lyrics__Container')]");
+                    }
+
+                    if (fallbackLyricsNode != null)
+                    {
+                        lyrics = HtmlEntity.DeEntitize(fallbackLyricsNode.InnerText).Trim();
+                    }
+                }
+
+                return !string.IsNullOrEmpty(lyrics) ? lyrics : null;
             }
         }
         catch (Exception ex)
         {
-            throw ex;
+            throw ex; // Consider logging the exception or handling it more gracefully
         }
     }
 
