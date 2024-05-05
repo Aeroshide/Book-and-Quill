@@ -105,9 +105,6 @@ public class LyricsRequester
                 response.EnsureSuccessStatusCode();
 
                 var content = await response.Content.ReadAsStringAsync();
-                // Log the content for inspection
-                Console.WriteLine(content); // For quick debugging, output to console
-                File.WriteAllText("fetchedContent.html", content); // Or write to a file for larger content
 
                 var doc = new HtmlDocument();
                 doc.LoadHtml(content);

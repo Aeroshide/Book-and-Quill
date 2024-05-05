@@ -7,6 +7,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -24,33 +25,46 @@ namespace Lyrics_Service
         public Form1()
         {
             InitializeComponent();
-            string fileContents = ReadFileContext("secret.aeroshide", "Book-and-Quill");
-            lyricsRequester = new LyricsRequester(fileContents);
+            lyricsRequester = new LyricsRequester(GetApiKeyFromResource());
         }
 
-        public string ReadFileContext(string fileName, string appName)
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            // Get the APPDATA environment variable
-            string appData = Environment.GetEnvironmentVariable("APPDATA");
-            if (string.IsNullOrEmpty(appData))
+            // Check if Ctrl+R is pressed
+            if (keyData == (Keys.Control | Keys.R))
             {
-                // Handle error: APPDATA environment variable not found.
-                throw new InvalidOperationException("APPDATA environment variable not found.");
+                // Call your method here
+                PerformCtrlRAction();
+                return true; // Return true to indicate that the key press has been handled
             }
-
-            // Construct the file path
-            string path = Path.Combine(appData, "Aeroshide", appName, fileName);
-
-            // Check if the file exists before attempting to open
-            if (!File.Exists(path))
-            {
-                // Handle error: file could not be opened.
-                throw new FileNotFoundException("The specified file could not be found.", path);
-            }
-
-            // Read and return the file content
-            return File.ReadAllText(path);
+            return base.ProcessCmdKey(ref msg, keyData);
         }
+
+        private void PerformCtrlRAction()
+        {
+            // Your action goes here
+            spotifyProcess = null;
+        }
+
+        public static string GetApiKeyFromResource()
+        {
+            Assembly assembly = Assembly.GetExecutingAssembly();
+            string resourceName = "Book_and_Quill.api.txt"; // Adjust the namespace and resource name accordingly
+
+            using (Stream stream = assembly.GetManifestResourceStream(resourceName))
+            {
+                if (stream == null)
+                {
+                    throw new InvalidOperationException("Resource not found.");
+                }
+
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd().Trim(); // Read and trim the API key
+                }
+            }
+        }
+
 
         public (SpotifyProcessStatus suc, string ret) HookSpotify()
         {
