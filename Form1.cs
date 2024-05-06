@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -37,7 +38,48 @@ namespace Lyrics_Service
                 PerformCtrlRAction();
                 return true; // Return true to indicate that the key press has been handled
             }
-            return base.ProcessCmdKey(ref msg, keyData);
+            else if (keyData == (Keys.Control | Keys.F))
+            {
+                PerformCtrlFAction();
+                return true;
+            }
+                return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        // Field to store the original text of the label
+        private string originalLabelText;
+
+        private void PerformCtrlFAction()
+        {
+            // Initialize originalLabelText with the label's text if it hasn't been set yet
+            if (originalLabelText == null)
+            {
+                originalLabelText = label1.Text;
+            }
+            else
+            {
+                // Restore the label's text to its original state before performing a new search
+                label1.Text = originalLabelText;
+            }
+
+            string searchString = Microsoft.VisualBasic.Interaction.InputBox("Enter text to find:", "Find Text", "", -1, -1);
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                int index = label1.Text.IndexOf(searchString, StringComparison.OrdinalIgnoreCase);
+                if (index != -1)
+                {
+                    string beforeMatch = label1.Text.Substring(0, index);
+                    string match = label1.Text.Substring(index, searchString.Length);
+                    string afterMatch = label1.Text.Substring(index + searchString.Length);
+
+                    // Update the label's text to "highlight" the found text
+                    label1.Text = $"{beforeMatch}\n**{match}**\n{afterMatch}";
+                }
+                else
+                {
+                    MessageBox.Show("Text not found.");
+                }
+            }
         }
 
         private void PerformCtrlRAction()

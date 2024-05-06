@@ -8,4 +8,5 @@ A windows application that displays song lyrics based on what you're currently l
 
 ## Keybinds:
 Ctrl-R: Redetect Spotify (use if spotify is wrongly detected)
+Ctrl-F: Find text occurence
 
