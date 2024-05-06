@@ -73,13 +73,15 @@ namespace Lyrics_Service
                     string afterMatch = label1.Text.Substring(index + searchString.Length);
 
                     // Update the label's text to "highlight" the found text
-                    label1.Text = $"{beforeMatch}\n**{match}**\n{afterMatch}";
+                    label1.Text = $"{beforeMatch}\n**{match.ToUpper()}**\n{afterMatch}";
                 }
                 else
                 {
                     MessageBox.Show("Text not found.");
                 }
             }
+
+            originalLabelText = null;
         }
 
         private void PerformCtrlRAction()
