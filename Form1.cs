@@ -22,6 +22,7 @@ namespace Lyrics_Service
         private string songCache;
         private int spotifyProcessIndex;
         private Process spotifyProcess;
+        private string lyrics;
 
         public Form1()
         {
@@ -46,21 +47,10 @@ namespace Lyrics_Service
                 return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        // Field to store the original text of the label
-        private string originalLabelText;
-
         private void PerformCtrlFAction()
         {
-            // Initialize originalLabelText with the label's text if it hasn't been set yet
-            if (originalLabelText == null)
-            {
-                originalLabelText = label1.Text;
-            }
-            else
-            {
-                // Restore the label's text to its original state before performing a new search
-                label1.Text = originalLabelText;
-            }
+            // Ensure the label's text is always set to the current lyrics before performing a new search
+            label1.Text = LyricsProcessor(lyrics);
 
             string searchString = Microsoft.VisualBasic.Interaction.InputBox("Enter text to find:", "Find Text", "", -1, -1);
             if (!string.IsNullOrEmpty(searchString))
@@ -73,15 +63,13 @@ namespace Lyrics_Service
                     string afterMatch = label1.Text.Substring(index + searchString.Length);
 
                     // Update the label's text to "highlight" the found text
-                    label1.Text = $"{beforeMatch}\n**{match.ToUpper()}**\n{afterMatch}";
+                    label1.Text = $"{beforeMatch}\n->**{match.ToUpper()}**<-\n{afterMatch}";
                 }
                 else
                 {
                     MessageBox.Show("Text not found.");
                 }
             }
-
-            originalLabelText = null;
         }
 
         private void PerformCtrlRAction()
@@ -232,7 +220,7 @@ namespace Lyrics_Service
                         Debug.WriteLine("cache:" + songCache);
                         try
                         {
-                            var lyrics = await Task.Run(() => lyricsRequester.GetLyricsAsync(spotifyProcess.ret));
+                            lyrics = await Task.Run(() => lyricsRequester.GetLyricsAsync(spotifyProcess.ret));
                             label1.Text = LyricsProcessor(lyrics);
                             songCache = spotifyProcess.ret;
                         }
